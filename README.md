@@ -1,12 +1,12 @@
 # Ani-Mates
 
-Real-time multiplayer anime picking + group compatibility scoring. Create a room, share the link, everyone picks an anime per category by searching MyAnimeList (via the [Jikan API](https://jikan.moe/)), and picks sync live for everyone via Supabase.
+Real-time multiplayer anime picking + group compatibility scoring. Create a room, share the link, everyone picks an anime per category by searching [AniList](https://anilist.co/), and picks sync live for everyone via Supabase.
 
 ## Stack
 
 - React + Vite (plain JS)
 - [Supabase](https://supabase.com/) — Postgres + Realtime, no Auth (see security note below)
-- [Jikan API](https://docs.api.jikan.moe/) — public MyAnimeList data, no API key needed
+- [AniList GraphQL API](https://docs.anilist.co/) — public anime data, no API key needed
 - Deploys to Vercel from this repo
 
 ## Setup

@@ -42,10 +42,10 @@ create table picks (
   room_id        text not null references rooms(id) on delete cascade,       -- denormalized to simplify RLS + realtime filters
   participant_id uuid not null references participants(id) on delete cascade,
   category_id    uuid not null references categories(id) on delete cascade,
-  mal_id         integer not null,
+  anilist_id     integer not null,   -- AniList's own media id (stable even when idMal is absent)
   title          text not null,
   image_url      text,
-  anime_type     text,               -- Jikan `type`: "TV" | "Movie" | "OVA" | ...
+  anime_type     text,               -- AniList `format`, display-mapped: "TV" | "Movie" | "OVA" | ...
   year           integer,
   genres         text[] not null default '{}',
   updated_at     timestamptz not null default now(),
@@ -69,23 +69,23 @@ create trigger picks_room_id_check
 before insert or update on picks
 for each row execute function picks_room_id_matches_category();
 
--- JIKAN SEARCH CACHE ---------------------------------------------------------
--- Shared across every room: caches Jikan search results by normalized query
+-- ANIME SEARCH CACHE ---------------------------------------------------------
+-- Shared across every room: caches anime search results by normalized query
 -- text so repeated/popular searches (across the whole app, not just one room)
--- don't re-hit Jikan's rate-limited API. Not room-scoped, not realtime --
--- purely a lookup-on-demand cache checked/written by src/lib/jikan.js. Public,
+-- don't re-hit the search provider's API. Not room-scoped, not realtime --
+-- purely a lookup-on-demand cache checked/written by src/lib/anilist.js. Public,
 -- non-sensitive data (it's just cached third-party API responses), so open
 -- RLS here isn't a meaningful trade-off the way it is for the tables above.
-create table jikan_search_cache (
+create table anime_search_cache (
   query      text primary key,   -- normalized (trimmed, lowercased) search query
-  results    jsonb not null,     -- the Jikan response's `data` array for this query
+  results    jsonb not null,     -- the raw media array for this query
   fetched_at timestamptz not null default now()
 );
 
-alter table jikan_search_cache enable row level security;
-create policy jikan_cache_select_all on jikan_search_cache for select using (true);
-create policy jikan_cache_insert_all on jikan_search_cache for insert with check (true);
-create policy jikan_cache_update_all on jikan_search_cache for update using (true) with check (true);
+alter table anime_search_cache enable row level security;
+create policy anime_cache_select_all on anime_search_cache for select using (true);
+create policy anime_cache_insert_all on anime_search_cache for insert with check (true);
+create policy anime_cache_update_all on anime_search_cache for update using (true) with check (true);
 
 -- REALTIME ------------------------------------------------------------------
 alter publication supabase_realtime add table participants, categories, picks;

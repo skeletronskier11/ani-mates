@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { searchAnime, toPickFields } from '../lib/jikan.js'
+import { searchAnime, toPickFields, formatLabel } from '../lib/anilist.js'
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js'
 
 export default function SearchModal({ categoryName, onClose, onSelect }) {
@@ -46,7 +46,7 @@ export default function SearchModal({ categoryName, onClose, onSelect }) {
         <input
           type="text"
           className="search-input"
-          placeholder="Search MAL via Jikan API..."
+          placeholder="Search AniList..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoFocus
@@ -59,16 +59,16 @@ export default function SearchModal({ categoryName, onClose, onSelect }) {
           )}
           {results.map((anime) => (
             <button
-              key={anime.mal_id}
+              key={anime.id}
               type="button"
               className="result-item"
               onClick={() => onSelect(toPickFields(anime))}
             >
-              <img src={anime.images?.jpg?.image_url} alt="" />
+              <img src={anime.coverImage?.large} alt="" />
               <div>
-                <strong style={{ fontSize: 14 }}>{anime.title_english || anime.title}</strong>
+                <strong style={{ fontSize: 14 }}>{anime.title?.english || anime.title?.romaji}</strong>
                 <div className="meta">
-                  {anime.type || 'TV'} • {anime.year || 'N/A'}
+                  {formatLabel(anime.format) || 'TV'} • {anime.seasonYear || 'N/A'}
                 </div>
               </div>
             </button>

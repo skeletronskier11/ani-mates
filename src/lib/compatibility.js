@@ -50,8 +50,8 @@ export function computeCompatibility(participants, categories, picks) {
 
   for (const cat of completeCategories) {
     const picksForCat = participantIds.map((pid) => picksByKey.get(pairKey(pid, cat.id)))
-    const uniqueMalIds = new Set(picksForCat.map((p) => p.mal_id))
-    if (uniqueMalIds.size === 1) {
+    const uniqueAnilistIds = new Set(picksForCat.map((p) => p.anilist_id))
+    if (uniqueAnilistIds.size === 1) {
       unanimousMatches.push({ category: cat, title: picksForCat[0].title })
     }
 
