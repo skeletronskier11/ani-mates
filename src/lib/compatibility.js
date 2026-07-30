@@ -1,4 +1,6 @@
-// ... existing code ...
+const MAX_BADGES = 4
+const HIGH_OVERLAP_THRESHOLD = 0.6
+
 function jaccard(setA, setB) {
   if (setA.size === 0 && setB.size === 0) return 1
   let intersectionSize = 0
@@ -16,7 +18,38 @@ function getDecade(year) {
 }
 
 function pairKey(participantId, categoryId) {
-// ... existing code ...
+  return `${participantId}:${categoryId}`
+  const pairs = []
+  for (let i = 0; i < participantIds.length; i++) {
+    for (let j = i + 1; j < participantIds.length; j++) {
+      pairs.push([participantIds[i], participantIds[j]])
+    }
+  }
+}
+
+/**
+ * Generalizes the 2-user "direct match" formula to N participants: an overall
+ * score blending exact-title unanimity with average pairwise genre overlap,
+ * computed only over scored categories every current participant has picked.
+ */
+export function computeCompatibility(participants, categories, picks) {
+  const scoredCategories = categories.filter((c) => c.is_scored)
+  const picksByKey = new Map(picks.map((p) => [pairKey(p.participant_id, p.category_id), p]))
+  const participantIds = participants.map((p) => p.id)
+
+  const completeCategories = scoredCategories.filter((cat) =>
+    participantIds.every((pid) => picksByKey.has(pairKey(pid, cat.id)))
+  )
+
+  const base = {
+    completedCategories: completeCategories.length,
+    totalScored: scoredCategories.length,
+  }
+
+  if (participantIds.length < 2 || completeCategories.length === 0) {
+    return { ...base, score: null, badges: [] }
+  }
+
   const pairs = []
   for (let i = 0; i < participantIds.length; i++) {
     for (let j = i + 1; j < participantIds.length; j++) {
@@ -104,11 +137,10 @@ function buildBadges({ score, unanimousMatches, overlapByCategory, decadeOverlap
   for (const cat of highOverlap) {
     badges.push({
       key: `overlap-${cat.id}`,
-      label: `🔥 ${Math.round(overlapByCategory.get(cat.id) * 100)}% ${cat.name} Genre Overlap`,
+      label: `🔥 ${Math.round(overlapByCategory.get(cat.id) * 100)}% ${cat.name} Overlap`,
     })
   }
 
-  // Generate badges for matching decades
   const highDecadeOverlap = completeCategories
     .filter((cat) => !matchedCategoryIds.has(cat.id) && decadeOverlapByCategory.get(cat.id) === 1)
 
@@ -125,8 +157,9 @@ function buildBadges({ score, unanimousMatches, overlapByCategory, decadeOverlap
 
   if (badges.length > MAX_BADGES) {
     const shown = badges.slice(0, MAX_BADGES)
-    shown.push({ key: 'more', label: +${badges.length - MAX_BADGES} more })
+    shown.push({ key: 'more', label: `+${badges.length - MAX_BADGES} more` })
     return shown
   }
 
   return badges
+}
