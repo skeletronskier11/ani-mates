@@ -24,7 +24,7 @@ body,
 }
 
 body {
-  background: var(--bg) url('/animates_bg.jpg') center / stretch no-repeat;
+  background: var(--bg) url('/animates_bg.jpg') center / cover no-repeat;
   color: var(--text);
   line-height: 1.5;
 }
