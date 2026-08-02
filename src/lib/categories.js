@@ -1,8 +1,8 @@
 export const DEFAULT_CATEGORIES = [
   'Favorite Anime',
   'Best Movie',
-  'Best OP',
-  'Best ED',
+  'Best Opening Theme',
+  'Best Ending Theme',
   'Best Sci-Fi',
   'Best Romance',
   'Best Isekai',
